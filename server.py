@@ -21,6 +21,24 @@ def get_gemini_response(prompt):
     response = model.generate_content(prompt)
     return response.text.strip() if response.text else "Jag kunde inte förstå frågan."
 
+# Global variabel för att lagra konversationshistorik
+conversation_history = []
+
+def get_gemini_response(prompt):
+    global conversation_history  # Behåll historik
+    model = genai.GenerativeModel("gemini-2.0-flash")  # Uppdaterad modell
+    conversation_history.append({"user": "User", "text": prompt})  # Spara användarens fråga
+
+    full_prompt = "\n".join([f"{msg['user']}: {msg['text']}" for msg in conversation_history])
+    
+    response = model.generate_content(full_prompt)
+    bot_response = response.text.strip() if response.text else "Jag kunde inte förstå frågan."
+
+    conversation_history.append({"user": "Bot", "text": bot_response})  # Spara botens svar
+
+    return bot_response
+
+
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     data = request.json
