@@ -27,12 +27,11 @@ def get_openai_response(prompt):
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     data = request.json
+    print("🔍 Slack Event Data:", data)  # Logga hela inkommande meddelandet
 
-    # 🛠 Hantera Slacks Challenge-request
-    if "challenge" in data:
+    if "challenge" in data:  # Hantera Slack's verifierings-request
         return jsonify({"challenge": data["challenge"]})
 
-    # Hantera Slack-meddelanden
     if "event" in data:
         event = data["event"]
 
@@ -40,13 +39,17 @@ def slack_events():
             user = event["user"]
             text = event["text"]
             channel = event["channel"]
+            print(f"📩 Meddelande från @{user} i kanal {channel}: {text}")  # Logga inkommande meddelanden
 
             try:
                 response_text = get_openai_response(text)
+                print(f"🤖 GPT-4 svar: {response_text}")  # Logga AI-svar
+
                 client.chat_postMessage(channel=channel, text=f"🤖: {response_text}")
+                print("✅ Meddelande skickat!")
 
             except SlackApiError as e:
-                print(f"Fel vid meddelandesändning: {e.response['error']}")
+                print(f"❌ Fel vid meddelandesändning: {e.response['error']}")
 
     return jsonify({"status": "ok"}), 200
 
