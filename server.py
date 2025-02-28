@@ -11,13 +11,13 @@ GEMINI_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 # Initiera Google Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Initiera Slack
+# Initiera Slack-klienten
 client = WebClient(token=SLACK_BOT_TOKEN)
 app = Flask(__name__)
 
-# Funktion för att hämta svar från Gemini
+# Funktion för att hämta svar från Gemini 2.0 Flash
 def get_gemini_response(prompt):
-    model = genai.GenerativeModel("gemini-pro")
+    model = genai.GenerativeModel("gemini-2.0-flash")  # 🔥 FIXAD modellnamn!
     response = model.generate_content(prompt)
     return response.text.strip() if response.text else "Jag kunde inte förstå frågan."
 
