@@ -17,12 +17,12 @@ app = Flask(__name__)
 import openai
 
 def get_openai_response(prompt):
-    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Nytt sätt att skapa klient
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",  # Testa först med gpt-3.5-turbo
         messages=[{"role": "user", "content": prompt}]
     )
-    return response.choices[0].message.content  # Nytt sätt att hämta svaret
+    return response.choices[0].message.content
 
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
