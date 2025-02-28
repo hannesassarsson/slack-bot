@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 # Funktion för att hämta svar från Gemini 2.0 Flash
 def get_gemini_response(prompt):
-    model = genai.GenerativeModel("gemini-2.0-flash")  # 🔥 FIXAD modellnamn!
+    model = genai.GenerativeModel("gemini-2.0-flash")  # Uppdaterad modell
     response = model.generate_content(prompt)
     return response.text.strip() if response.text else "Jag kunde inte förstå frågan."
 
