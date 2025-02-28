@@ -1,37 +1,36 @@
 import os
-import openai
+import google.generativeai as genai
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from flask import Flask, request, jsonify
 
-# Hämta tokens från miljövariabler
+# Hämta API-nycklar
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 
-# Initiera Slack och OpenAI
-openai.api_key = OPENAI_API_KEY
+# Initiera Google Gemini
+genai.configure(api_key=GEMINI_API_KEY)
+
+# Initiera Slack
 client = WebClient(token=SLACK_BOT_TOKEN)
 app = Flask(__name__)
 
-# Funktion för att hantera meddelanden
-import openai
-
-def get_openai_response(prompt):
-    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",  # Testa först med gpt-3.5-turbo
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
+# Funktion för att hämta svar från Gemini
+def get_gemini_response(prompt):
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    return response.text.strip() if response.text else "Jag kunde inte förstå frågan."
 
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     data = request.json
-    print("🔍 Slack Event Data:", data)  # Logga hela inkommande meddelandet
+    print("🔍 Slack Event Data:", data)  # Logga inkommande data
 
-    if "challenge" in data:  # Hantera Slack's verifierings-request
+    # Hantera Slacks Challenge-verifiering
+    if "challenge" in data:
         return jsonify({"challenge": data["challenge"]})
 
+    # Hantera Slack-meddelanden
     if "event" in data:
         event = data["event"]
 
@@ -42,8 +41,8 @@ def slack_events():
             print(f"📩 Meddelande från @{user} i kanal {channel}: {text}")  # Logga inkommande meddelanden
 
             try:
-                response_text = get_openai_response(text)
-                print(f"🤖 GPT-4 svar: {response_text}")  # Logga AI-svar
+                response_text = get_gemini_response(text)
+                print(f"🤖 Gemini svar: {response_text}")  # Logga AI-svar
 
                 client.chat_postMessage(channel=channel, text=f"🤖: {response_text}")
                 print("✅ Meddelande skickat!")
