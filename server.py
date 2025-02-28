@@ -14,12 +14,15 @@ client = WebClient(token=SLACK_BOT_TOKEN)
 app = Flask(__name__)
 
 # Funktion för att hantera meddelanden
+import openai
+
 def get_openai_response(prompt):
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Nytt sätt att skapa klient
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content  # Nytt sätt att hämta svaret
 
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
