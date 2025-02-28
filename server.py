@@ -25,6 +25,11 @@ def get_openai_response(prompt):
 def slack_events():
     data = request.json
 
+    # 🛠 Hantera Slacks Challenge-request
+    if "challenge" in data:
+        return jsonify({"challenge": data["challenge"]})
+
+    # Hantera Slack-meddelanden
     if "event" in data:
         event = data["event"]
 
